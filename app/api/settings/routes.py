@@ -13,8 +13,7 @@ settings_blueprint = Blueprint('settings', __name__)
 def update_user():
     user_id = get_jwt_identity()
     update_data = request.json
-    # Удалите поля, которые нельзя обновлять напрямую
-    update_data.pop('password', None)  # Предотвратить обновление пароля через этот метод
+    update_data.pop('password', None)
 
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': update_data})
     user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
