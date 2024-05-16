@@ -1,4 +1,5 @@
 # /app/api/reviews/routes.py
+import datetime
 from flask import Blueprint, request, jsonify
 from ...services.utils import serialize_document
 from ...services.database import mongo
@@ -16,7 +17,9 @@ def create_review(hotel_id):
         'user_id': ObjectId(user_id),
         'hotel_id': ObjectId(hotel_id),
         'text': data['text'],
-        'rating': data['rating']
+        'rating': data['rating'],
+        'isDeleted': False,
+        'created_at': datetime.datetime.now() 
     }
     mongo.db.reviews.insert_one(review)
     return jsonify({'message': 'Review added successfully'}), 201

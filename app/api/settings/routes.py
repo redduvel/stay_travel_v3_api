@@ -1,4 +1,5 @@
 # /app/api/settings/routes.py
+import datetime
 from bson import ObjectId
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,7 +28,6 @@ def update_password():
     new_password = request.json.get('new_password')
     user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
 
-    print(type(user['password']), type(old_password))
     if not check_password_hash(user['password'], old_password):
         return jsonify({'error': 'Invalid password'}), 401
 
@@ -35,4 +35,6 @@ def update_password():
         {'_id': user_id},
         {'$set': {'password': generate_password_hash(new_password)}}
     )
+    user['set_password'] = datetime.datetime.now()
+
     return jsonify({'message': 'Password updated successfully'}), 200

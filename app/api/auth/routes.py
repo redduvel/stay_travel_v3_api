@@ -10,7 +10,7 @@ from ...services.database import mongo
 auth_blueprint = Blueprint('auth', __name__)
 
 def create_token(user_id):
-    expires = datetime.timedelta(hours=24)
+    expires = datetime.timedelta(hours=128)
     access_token = create_access_token(identity=str(user_id), expires_delta=expires)
     return access_token
 
@@ -37,6 +37,7 @@ def login():
 
 @auth_blueprint.route('/register', methods=['POST'])
 def register():
+    data = request.json
     emailOrNumber = request.json.get('emailOrNumber')
     password = request.json.get('password')
     input_type = identify_string(emailOrNumber)
@@ -53,10 +54,16 @@ def register():
     else:
         return jsonify({'error': 'Invalid email or phone number format'}), 400
 
+    user_data['created_at'] = datetime.datetime.now()
+    user_data['isDeleted'] = False
+    
     user_id = mongo.db.users.insert_one(user_data).inserted_id
     user = mongo.db.users.find_one({'_id': user_id})
+
     token = create_token(user['_id'])
     user_data = serialize_document(user)
     user_data['token'] = token
+
+
     return jsonify(user_data), 200
 

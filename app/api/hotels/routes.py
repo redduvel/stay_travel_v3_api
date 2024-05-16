@@ -11,9 +11,10 @@ hotels_blueprint = Blueprint('hotels', __name__)
 @hotels_blueprint.route('/', methods=['POST'])
 @jwt_required()
 def create_hotel():
-    # Предполагаем, что данные о новом отеле передаются в JSON формате
     hotel_data = request.json
-    hotel_data['owner_id'] = get_jwt_identity()  # Идентификатор пользователя из токена
+    hotel_data['owner_id'] = get_jwt_identity()
+    hotel_data['created_at'] = datetime.datetime.now()
+    hotel_data['isDeleted'] = False
     result = mongo.db.hotels.insert_one(hotel_data)
     return jsonify({'hotel_id': str(result.inserted_id)}), 201
 
