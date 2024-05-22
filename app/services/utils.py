@@ -31,13 +31,22 @@ def serialize_document(document):
     """
     if document is None:
         return None
+
+    def serialize_value(value):
+        if isinstance(value, ObjectId):
+            return str(value)  # Преобразование ObjectId в строку
+        elif isinstance(value, datetime.datetime):
+            return value.isoformat()  # Преобразование datetime в ISO формат
+        elif isinstance(value, list):
+            return [serialize_value(item) for item in value]  # Рекурсивное преобразование элементов списка
+        elif isinstance(value, dict):
+            return serialize_document(value)  # Рекурсивное преобразование вложенных словарей
+        else:
+            return value
+
     serialized = {}
     for key, value in document.items():
-        if isinstance(value, ObjectId):
-            serialized[key] = str(value)  # Преобразование ObjectId в строку
-        elif isinstance(value, datetime.datetime):
-            serialized[key] = value.isoformat()  # Преобразование datetime в ISO формат
-        else:
-            serialized[key] = value
+        serialized[key] = serialize_value(value)
+
     return serialized
 
