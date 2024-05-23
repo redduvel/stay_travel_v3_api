@@ -10,7 +10,7 @@ hotels_blueprint = Blueprint('hotels', __name__)
 
 @hotels_blueprint.route('/', methods=['POST'])
 @jwt_required()
-def create_hotel():
+def create_hotel(): 
     hotel_data = request.json
     hotel_data['owner_id'] = get_jwt_identity()
     hotel_data['created_at'] = datetime.datetime.now()
@@ -32,7 +32,16 @@ def get_hotels():
 
     skip = (page - 1) * limit
 
-    hotels = mongo.db.hotels.find(query_filter).skip(skip).limit(limit)
+    hotels_cursor = mongo.db.hotels.find(query_filter).skip(skip).limit(limit)
+    
+    hotels = []
+    for hotel in hotels_cursor:
+        features_id = hotel['features']
+        features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
+        hotel['features'] = [[feature['name'], feature['icon']] for feature in features]
+        hotel['features'] = remove_duplicates(hotel['features'])
+        hotels.append(hotel)
+
     total = mongo.db.hotels.count_documents(query_filter) 
 
     return jsonify({
@@ -41,6 +50,7 @@ def get_hotels():
         'limit': limit,
         'hotels': [serialize_document(hotel) for hotel in hotels]
     }), 200
+
 
 @hotels_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_hotel(hotel_id):

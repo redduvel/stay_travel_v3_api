@@ -50,3 +50,21 @@ def serialize_document(document):
 
     return serialized
 
+def serialize_cursor(cursor):
+    """
+    Преобразует документы в курсоре в сериализованный список.
+    Аргументы:
+        cursor (Cursor): Курсор MongoDB.
+    Возвращает:
+        list: Список сериализованных документов.
+    """
+    return [serialize_document(doc) for doc in cursor]
+
+def remove_duplicates(service_list):
+    seen = set()
+    unique_services = []
+    for service in service_list:
+        if service[0] not in seen:
+            unique_services.append(service)
+            seen.add(service[0])
+    return unique_services

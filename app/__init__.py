@@ -11,6 +11,7 @@ from app.api.hotels.routes import hotels_blueprint
 from app.api.bookings.routes import bookings_blueprint
 from app.api.health import health_blueprint
 from app.api.reviews.routes import reviews_blueprint
+from app.api.features.routes import features_blueprint
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -25,7 +26,7 @@ def create_app(config_class=Config):
     app.register_blueprint(hotels_blueprint, url_prefix='/hotels')
     app.register_blueprint(bookings_blueprint, url_prefix='/bookings')
     app.register_blueprint(reviews_blueprint, url_prefix='/reviews')
+    app.register_blueprint(features_blueprint, url_prefix='/features')
     app.register_blueprint(health_blueprint)
-
 
     return app
