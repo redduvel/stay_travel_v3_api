@@ -55,6 +55,12 @@ def get_hotels():
 @hotels_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_hotel(hotel_id):
     hotel = mongo.db.hotels.find_one({'_id': ObjectId(hotel_id)})
+
+    features_id = hotel['features']
+    features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
+    hotel['features'] = [serialize_document(feature) for feature in features]
+    hotel['features'] = remove_duplicates(hotel['features'])
+
     if hotel:
         return jsonify(serialize_document(hotel)), 200
     else:
