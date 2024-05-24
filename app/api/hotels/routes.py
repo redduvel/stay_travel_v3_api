@@ -38,7 +38,7 @@ def get_hotels():
     for hotel in hotels_cursor:
         features_id = hotel['features']
         features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
-        hotel['features'] = [[feature['name'], feature['icon']] for feature in features]
+        hotel['features'] = [serialize_document(feature) for feature in features]
         hotel['features'] = remove_duplicates(hotel['features'])
         hotels.append(hotel)
 
