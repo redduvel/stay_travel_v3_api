@@ -60,11 +60,13 @@ def serialize_cursor(cursor):
     """
     return [serialize_document(doc) for doc in cursor]
 
-def remove_duplicates(service_list):
+def remove_duplicates(features):
     seen = set()
-    unique_services = []
-    for service in service_list:
-        if service[0] not in seen:
-            unique_services.append(service)
-            seen.add(service[0])
-    return unique_services
+    unique_features = []
+    for feature in features:
+        identifier = (feature['icon'], feature['name'])
+        if identifier not in seen:
+            seen.add(identifier)
+            unique_features.append(feature)
+    
+    return unique_features
