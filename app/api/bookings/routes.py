@@ -13,16 +13,26 @@ bookings_blueprint = Blueprint('bookings', __name__)
 def create_booking():
     user_id = get_jwt_identity()
     data = request.json
+    
+    hotel_id = ObjectId(data['hotel_id'])
+    hotel = mongo.db.hotels.find_one({'_id': hotel_id})
+    
+    if not hotel:
+        return jsonify({'error': 'Hotel not found'}), 404
+
     booking = {
         'user_id': ObjectId(user_id),
-        'hotel_id': ObjectId(data['hotel_id']),
-        'start_date': datetime.datetime.strptime(data['start_date'], '%Y-%m-%d'),
-        'end_date': datetime.datetime.strptime(data['end_date'], '%Y-%m-%d'),
+        'hotel_id': hotel_id,
+        'hotel_name': hotel['name'],
+        'hotel_address': hotel['address'],
+        'start_date': data['start_date'],
+        'end_date': data['end_date'],
         'description': data.get('description', ''),
-        'status': 'Ожидание',
+        'status': data['status'],
         'isDeleted': False,
         'created_at': datetime.datetime.now()
     }
+
     result = mongo.db.bookings.insert_one(booking)
     return jsonify({'booking_id': str(result.inserted_id)}), 201
 

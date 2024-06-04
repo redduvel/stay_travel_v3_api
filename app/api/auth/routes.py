@@ -6,6 +6,8 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from ...services.utils import serialize_document, identify_string
 from ...services.database import mongo
+from bson.objectid import ObjectId
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -25,7 +27,7 @@ def login():
     elif input_type == 'phone':
         user = mongo.db.users.find_one({'number': emailOrNumber})
     else:
-        return jsonify({'error': 'Invalid email or phone number format'}), 400
+        return jsonify({'error': 'Неверный формат введенных данных.'}), 400
 
     if user and check_password_hash(user['password'], password):
         token = create_token(user['_id'])
@@ -33,7 +35,7 @@ def login():
         user_data['token'] = token
         return jsonify(user_data), 200
     else:
-        return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({'error': 'Неверный логин или пароль'}), 401
 
 @auth_blueprint.route('/register', methods=['POST'])
 def register():
@@ -67,3 +69,21 @@ def register():
 
     return jsonify(user_data), 200
 
+@auth_blueprint.route('/me', methods=['GET'])
+@jwt_required()
+def me():
+    print(get_jwt_identity())
+    try:
+        user_id = get_jwt_identity()
+        if not ObjectId.is_valid(user_id):
+            return jsonify({"msg": "Invalid user ID"}), 400
+
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+
+        if user:
+            user_data = serialize_document(user)
+            return jsonify(user_data), 200
+        else:
+            return jsonify({"msg": "User not found"}), 404
+    except Exception as e:
+        return jsonify({"msg": "Internal server error"}), 500

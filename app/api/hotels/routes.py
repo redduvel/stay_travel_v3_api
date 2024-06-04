@@ -51,7 +51,6 @@ def get_hotels():
         'hotels': [serialize_document(hotel) for hotel in hotels]
     }), 200
 
-
 @hotels_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_hotel(hotel_id):
     hotel = mongo.db.hotels.find_one({'_id': ObjectId(hotel_id)})

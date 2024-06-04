@@ -12,6 +12,7 @@ from app.api.bookings.routes import bookings_blueprint
 from app.api.health import health_blueprint
 from app.api.reviews.routes import reviews_blueprint
 from app.api.features.routes import features_blueprint
+from app.api.favorites.routes import favorites_blueprint
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -27,6 +28,7 @@ def create_app(config_class=Config):
     app.register_blueprint(bookings_blueprint, url_prefix='/bookings')
     app.register_blueprint(reviews_blueprint, url_prefix='/reviews')
     app.register_blueprint(features_blueprint, url_prefix='/features')
+    app.register_blueprint(favorites_blueprint, url_prefix='/favorites')
     app.register_blueprint(health_blueprint)
 
     return app
