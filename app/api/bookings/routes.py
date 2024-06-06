@@ -61,13 +61,13 @@ def update_booking_status(booking_id):
 @jwt_required()
 def get_bookings_by_user():
     user_id = get_jwt_identity()
-    # Поиск бронирований, где текущий пользователь присутствует в массиве users
-    bookings = mongo.db.bookings.find({'users': ObjectId(user_id), 'isDeleted': False})
+    bookings = mongo.db.bookings.find({'user_id': ObjectId(user_id), 'isDeleted': False})
     results = []
     for booking in bookings:
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
         booking_data = serialize_document(booking)
-        booking_data['hotel'] = serialize_document(hotel)
+        booking_data['hotel_name'] = hotel['name']
+        booking_data['hotel_address'] = hotel['address']
         results.append(booking_data)
     
     return jsonify(results), 200

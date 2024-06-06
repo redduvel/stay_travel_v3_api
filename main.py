@@ -1,6 +1,10 @@
 import os
 from app import create_app
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
+print(generate_password_hash("1234567890"))
+
 app = create_app()
 
 if __name__ == "__main__":
