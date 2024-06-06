@@ -1,6 +1,6 @@
 # /app/api/bookings/routes.py
 from flask import Blueprint, request, jsonify
-from ...services.utils import serialize_document
+from ...services.utils import serialize_cursor, serialize_document
 from ...services.database import mongo
 from bson.objectid import ObjectId
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -61,14 +61,17 @@ def update_booking_status(booking_id):
 @jwt_required()
 def get_bookings_by_user():
     user_id = get_jwt_identity()
-    bookings = mongo.db.bookings.find({'user_id': ObjectId(user_id), 'isDeleted': False})
+    bookings = mongo.db.bookings.find({'users': ObjectId(user_id), 'isDeleted': False})
+
     results = []
     for booking in bookings:
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
         booking_data = serialize_document(booking)
+        print(booking_data)
         booking_data['hotel_name'] = hotel['name']
         booking_data['hotel_address'] = hotel['address']
         results.append(booking_data)
     
+    print(results)
     return jsonify(results), 200
 
