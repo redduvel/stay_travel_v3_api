@@ -24,7 +24,7 @@ def create_review(hotel_id):
     mongo.db.reviews.insert_one(review)
     return jsonify({'message': 'Review added successfully'}), 201
 
-@reviews_blueprint.route('/hotel/<hotel_id>', methods=['GET'])
+@reviews_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_reviews(hotel_id):
     reviews = mongo.db.reviews.find({'hotel_id': ObjectId(hotel_id)})
     result = [serialize_document(review) for review in reviews]

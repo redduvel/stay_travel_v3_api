@@ -61,7 +61,8 @@ def update_booking_status(booking_id):
 @jwt_required()
 def get_bookings_by_user():
     user_id = get_jwt_identity()
-    bookings = mongo.db.bookings.find({'user_id': ObjectId(user_id), 'isDeleted': False})
+    # Поиск бронирований, где текущий пользователь присутствует в массиве users
+    bookings = mongo.db.bookings.find({'users': ObjectId(user_id), 'isDeleted': False})
     results = []
     for booking in bookings:
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
