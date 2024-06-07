@@ -13,7 +13,7 @@ hotels_blueprint = Blueprint('hotels', __name__)
 @jwt_required()
 def create_hotel(): 
     hotel_data = request.json
-    hotel_data['owner_id'] = get_jwt_identity()
+    hotel_data['owner_id'] = ObjectId(get_jwt_identity())
     hotel_data['created_at'] = datetime.datetime.now()
     hotel_data['isDeleted'] = False
     hotel_data['averageRating'] = None
