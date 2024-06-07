@@ -19,7 +19,7 @@ def create_hotel():
     hotel_data['averageRating'] = None
     hotel_data['totalClients'] = 0
     # Decoding base64 images
-    hotel_data['images'] = [base64.b64decode(photo) for photo in hotel_data['photos']]
+    #hotel_data['images'] = [base64.b64decode(photo) for photo in hotel_data['photos']]
 
     result = mongo.db.hotels.insert_one(hotel_data)
     return jsonify({'hotel_id': str(result.inserted_id)}), 201
@@ -66,12 +66,11 @@ def get_user_hotels():
     for hotel in hotels_cursor:
         features_id = hotel['features']
         features = []
-        if features_id:
-            features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
+        features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
         hotel['features'] = [serialize_document(feature) for feature in features]
-        hotels.append(hotel)
+        hotels.append(hotel)    
 
-    return jsonify(serialize_document(hotel) for hotel in hotels), 200
+    return jsonify([serialize_document(hotel) for hotel in hotels]), 200
 
 @hotels_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_hotel(hotel_id):
