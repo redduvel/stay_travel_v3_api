@@ -45,7 +45,6 @@ def get_hotels():
         features_id = hotel['features']
         features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
         hotel['features'] = [serialize_document(feature) for feature in features]
-        hotel['features'] = remove_duplicates(hotel['features'])
         hotels.append(hotel)
 
     total = mongo.db.hotels.count_documents(query_filter) 
@@ -56,6 +55,23 @@ def get_hotels():
         'limit': limit,
         'hotels': [serialize_document(hotel) for hotel in hotels]
     }), 200
+
+@hotels_blueprint.route('/user', methods=['GET'])
+@jwt_required()
+def get_user_hotels():
+    user_id = get_jwt_identity()
+    hotels_cursor = mongo.db.hotels.find({"owner_id": ObjectId(user_id)})
+
+    hotels = []
+    for hotel in hotels_cursor:
+        features_id = hotel['features']
+        features = []
+        if features_id:
+            features = [mongo.db.features.find_one({'_id': ObjectId(id)}) for id in features_id]
+        hotel['features'] = [serialize_document(feature) for feature in features]
+        hotels.append(hotel)
+
+    return jsonify(serialize_document(hotel) for hotel in hotels), 200
 
 @hotels_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_hotel(hotel_id):
