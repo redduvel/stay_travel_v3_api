@@ -1,4 +1,5 @@
 # /app/api/hotels/routes.py
+import base64
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from ...services.database import mongo
@@ -15,6 +16,11 @@ def create_hotel():
     hotel_data['owner_id'] = get_jwt_identity()
     hotel_data['created_at'] = datetime.datetime.now()
     hotel_data['isDeleted'] = False
+    hotel_data['averageRating'] = None
+    hotel_data['totalClients'] = 0
+    # Decoding base64 images
+    hotel_data['images'] = [base64.b64decode(photo) for photo in hotel_data['photos']]
+
     result = mongo.db.hotels.insert_one(hotel_data)
     return jsonify({'hotel_id': str(result.inserted_id)}), 201
 
