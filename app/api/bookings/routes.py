@@ -87,9 +87,15 @@ def get_bookings_by_owner():
     results = []
     for booking in bookings:
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
+        
+        creator_id = booking['users'][0]
+        user = mongo.db.users.find_one({'_id': ObjectId(creator_id)})
+        
         booking_data = serialize_document(booking)
         booking_data['hotel_name'] = hotel['name']
         booking_data['hotel_address'] = hotel['address']
+        booking_data['user_name'] = f"{user['first_name']} {user['last_name']}"
+        
         results.append(booking_data)
     
     return jsonify(results), 200
