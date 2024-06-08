@@ -23,14 +23,11 @@ def create_booking():
     booking = {
         'users': [ObjectId(user_id) for user_id in data['userIds']],
         'hotel_id': hotel_id,
-        'hotel_name': hotel['name'],
-        'hotel_address': hotel['address'],
         'start_date': data['start_date'],
         'end_date': data['end_date'],
         'description': data.get('description', ''),
         'status': data['status'],
         'isDeleted': False,
-        'createdAt': datetime.datetime.now()
     }
 
     result = mongo.db.bookings.insert_one(booking)
