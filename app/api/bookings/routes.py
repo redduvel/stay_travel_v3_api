@@ -21,7 +21,7 @@ def create_booking():
         return jsonify({'error': 'Hotel not found'}), 404
 
     booking = {
-        'user_id': ObjectId(user_id),
+        'users': [ObjectId(user_id) for user_id in data['userIds']],
         'hotel_id': hotel_id,
         'hotel_name': hotel['name'],
         'hotel_address': hotel['address'],
@@ -30,7 +30,7 @@ def create_booking():
         'description': data.get('description', ''),
         'status': data['status'],
         'isDeleted': False,
-        'created_at': datetime.datetime.now()
+        'createdAt': datetime.datetime.now()
     }
 
     result = mongo.db.bookings.insert_one(booking)
