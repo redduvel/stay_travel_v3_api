@@ -72,6 +72,25 @@ def get_bookings_by_user():
         booking_data['hotel_address'] = hotel['address']
         results.append(booking_data)
     
-    print(results)
+    return jsonify(results), 200
+
+@bookings_blueprint.route('/businessman', methods=['GET'])
+@jwt_required()
+def get_bookings_by_owner():
+    owner_id = get_jwt_identity()
+    
+    hotels = mongo.db.hotels.find({'owner_id': ObjectId(owner_id), 'isDeleted': False})
+    hotel_ids = [hotel['_id'] for hotel in hotels]
+    
+    bookings = mongo.db.bookings.find({'hotel_id': {'$in': hotel_ids}, 'isDeleted': False})
+
+    results = []
+    for booking in bookings:
+        hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
+        booking_data = serialize_document(booking)
+        booking_data['hotel_name'] = hotel['name']
+        booking_data['hotel_address'] = hotel['address']
+        results.append(booking_data)
+    
     return jsonify(results), 200
 
