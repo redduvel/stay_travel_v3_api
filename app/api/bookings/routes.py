@@ -22,9 +22,10 @@ def create_booking():
 
     booking = data
     booking['users'] = [ObjectId(user_id) for user_id in data['users']]
+    booking['hotel_id'] = ObjectId(hotel_id)
     booking['isDeleted'] = False
 
-    result = mongo.db.bookings.insert_one(booking)
+    result = mongo.db.bookings.insert_one(booking) 
     return jsonify({'booking_id': str(result.inserted_id)}), 201
 
 
