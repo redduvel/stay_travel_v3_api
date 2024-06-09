@@ -18,6 +18,7 @@ def create_hotel():
     hotel_data['isDeleted'] = False
     hotel_data['averageRating'] = None
     hotel_data['totalClients'] = 0
+    hotel_data['features'] = [ObjectId(feature) for feature in hotel_data['features']]
     # Decoding base64 images
     #hotel_data['images'] = [base64.b64decode(photo) for photo in hotel_data['photos']]
 
