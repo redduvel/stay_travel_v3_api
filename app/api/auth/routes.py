@@ -77,17 +77,16 @@ def register():
 @jwt_required()
 def me():
     print(get_jwt_identity())
-    try:
-        user_id = get_jwt_identity()
-        if not ObjectId.is_valid(user_id):
-            return jsonify({"msg": "Invalid user ID"}), 400
+    user_id = get_jwt_identity()
+    if not ObjectId.is_valid(user_id):
+        return jsonify({"msg": "Invalid user ID"}), 400
 
-        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
 
-        if user:
-            user_data = serialize_document(user)
-            return jsonify(user_data), 200
-        else:
-            return jsonify({"msg": "User not found"}), 404
-    except Exception as e:
-        return jsonify({"msg": "Internal server error"}), 500
+    if user:
+        user.pop('password')
+        user_data = serialize_document(user)
+        
+        return jsonify(user_data), 200
+    else:
+        return jsonify({"msg": "User not found"}), 404
