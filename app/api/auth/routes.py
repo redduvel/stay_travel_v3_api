@@ -3,13 +3,14 @@ from flask_jwt_extended import create_access_token
 import jwt
 import datetime
 from flask import Blueprint, request, jsonify, current_app
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt
 from ...services.utils import serialize_document, identify_string
 from ...services.database import mongo
 from bson.objectid import ObjectId
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 auth_blueprint = Blueprint('auth', __name__)
+
 
 def create_token(user_id):
     expires = datetime.timedelta(hours=128)
@@ -29,10 +30,11 @@ def login():
     else:
         return jsonify({'error': 'Неверный формат введенных данных.'}), 400
 
-    if user and check_password_hash(user['password'], password):
+    if user and bcrypt.checkpw(password.encode(encoding="utf-8"), user['password']):
         token = create_token(user['_id'])
         user_data = serialize_document(user)
         user_data['token'] = token
+        user_data.pop('password')
         return jsonify(user_data), 200
     else:
         return jsonify({'error': 'Неверный логин или пароль'}), 401
@@ -41,11 +43,10 @@ def login():
 def register():
     data = request.json
     emailOrNumber = request.json.get('emailOrNumber')
-    password = request.json.get('password')
+    p = request.json.get('password')
     input_type = identify_string(emailOrNumber)
-
-    data = {'password': generate_password_hash(password)}
-    d
+    data['password'] = bcrypt.hashpw(p.encode(encoding="utf-8") , bcrypt.gensalt())
+    
     if input_type == 'email':
         if mongo.db.users.find_one({'email': emailOrNumber}):
             return jsonify({'error': 'Email already exists'}), 409
@@ -69,7 +70,7 @@ def register():
     data = serialize_document(user)
     data['token'] = token
 
-
+    data.pop('password')
     return jsonify(data), 200
 
 @auth_blueprint.route('/me', methods=['GET'])
