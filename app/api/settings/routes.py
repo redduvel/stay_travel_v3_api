@@ -2,7 +2,7 @@
 import datetime
 from bson import ObjectId
 from flask import Blueprint, request, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt
 from ...services.database import mongo
 from ...services.utils import serialize_document
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -28,12 +28,12 @@ def update_password():
     new_password = request.json.get('new_password')
     user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
 
-    if not check_password_hash(user['password'], old_password):
+    if not bcrypt.checkpw(old_password.encode(encoding="utf-8"), user['password']):
         return jsonify({'error': 'Invalid password'}), 401
 
     mongo.db.users.update_one(
         {'_id': user_id},
-        {'$set': {'password': generate_password_hash(new_password)}}
+        {'$set': {'password': bcrypt.hashpw(new_password.encode(encoding="utf-8"))}}
     )
     user['set_password'] = datetime.datetime.now()
 
