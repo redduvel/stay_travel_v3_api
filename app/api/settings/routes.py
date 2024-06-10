@@ -16,8 +16,8 @@ def update_user():
     update_data = request.json
 
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': update_data})
-    user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
-    return jsonify(serialize_document(user)), 200
+
+    return jsonify({'message': 'Profile updated successfully'}), 200
 
 @settings_blueprint.route('/update_password', methods=['PUT'])
 @jwt_required()
