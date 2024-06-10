@@ -44,30 +44,33 @@ def register():
     password = request.json.get('password')
     input_type = identify_string(emailOrNumber)
 
-    user_data = {'password': generate_password_hash(password)}
+    data = {'password': generate_password_hash(password)}
+    d
     if input_type == 'email':
         if mongo.db.users.find_one({'email': emailOrNumber}):
             return jsonify({'error': 'Email already exists'}), 409
-        user_data['email'] = emailOrNumber
+        data['email'] = emailOrNumber
     elif input_type == 'phone':
         if mongo.db.users.find_one({'number': emailOrNumber}):
             return jsonify({'error': 'Phone number already exists'}), 409
-        user_data['number'] = emailOrNumber
+        data['number'] = emailOrNumber
     else:
         return jsonify({'error': 'Invalid email or phone number format'}), 400
 
-    user_data['created_at'] = datetime.datetime.now()
-    user_data['isDeleted'] = False
+    data.pop('emailOrNumber')
+
+    data['created_at'] = datetime.datetime.now()
+    data['isDeleted'] = False
     
-    user_id = mongo.db.users.insert_one(user_data).inserted_id
+    user_id = mongo.db.users.insert_one(data).inserted_id
     user = mongo.db.users.find_one({'_id': user_id})
 
     token = create_token(user['_id'])
-    user_data = serialize_document(user)
-    user_data['token'] = token
+    data = serialize_document(user)
+    data['token'] = token
 
 
-    return jsonify(user_data), 200
+    return jsonify(data), 200
 
 @auth_blueprint.route('/me', methods=['GET'])
 @jwt_required()
