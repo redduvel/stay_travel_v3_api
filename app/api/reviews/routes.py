@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 reviews_blueprint = Blueprint('reviews', __name__)
 
-@reviews_blueprint.route('/hotel/<hotel_id>', methods=['POST'])
+@reviews_blueprint.route('/reviews/<hotel_id>', methods=['POST'])
 @jwt_required()
 def create_review(hotel_id):
     user_id = get_jwt_identity()
