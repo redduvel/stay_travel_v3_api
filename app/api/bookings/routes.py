@@ -25,6 +25,7 @@ def create_booking():
     booking['hotel_id'] = ObjectId(hotel_id)
     booking['isDeleted'] = False
 
+    mongo.db.hotels.update_one({'_id': hotel_id}, {'$inc': {'totalClients': 1}})
     result = mongo.db.bookings.insert_one(booking) 
     return jsonify({'booking_id': str(result.inserted_id)}), 201
 
