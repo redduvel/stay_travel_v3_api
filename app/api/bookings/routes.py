@@ -65,7 +65,7 @@ def get_bookings_by_user():
         if 'end_date' in booking:
             end_date = datetime.fromisoformat(booking['end_date'].replace("Z", "+00:00"))
             if end_date < current_time:
-                booking['status'] = 'complete'
+                booking['status'] = 'completed'
                 mongo.db.bookings.update_one({'_id': booking['_id']}, {'$set': {'status': 'complete'}})
         
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
