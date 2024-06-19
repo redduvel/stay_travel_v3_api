@@ -59,7 +59,7 @@ def get_bookings_by_user():
     bookings = mongo.db.bookings.find({'users': ObjectId(user_id), 'isDeleted': False})
 
     results = []
-    current_time = datetime.utcnow()
+    current_time = datetime.now()
 
     for booking in bookings:
         if 'end_date' in booking:
