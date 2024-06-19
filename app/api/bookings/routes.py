@@ -59,17 +59,15 @@ def get_bookings_by_user():
     bookings = mongo.db.bookings.find({'users': ObjectId(user_id), 'isDeleted': False})
 
     results = []
-    for booking in bookings:
-        # Update status to "completed" if end_date has passed
-        if 'end_date' in booking:
-            end_date = datetime.strptime(booking['end_date'], "%Y-%m-%dT%H:%M:%S")
-            if end_date < datetime.utcnow():
-                booking['status'] = 'completed'
-                mongo.db.bookings.update_one(
-                    {'_id': booking['_id']},
-                    {'$set': {'status': 'completed'}}
-                )
+    current_time = datetime.utcnow()
 
+    for booking in bookings:
+        if 'end_date' in booking:
+            end_date = datetime.fromisoformat(booking['end_date'].replace("Z", "+00:00"))
+            if end_date < current_time:
+                booking['status'] = 'complete'
+                mongo.db.bookings.update_one({'_id': booking['_id']}, {'$set': {'status': 'complete'}})
+        
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
         booking_data = serialize_document(booking)
         booking_data['hotel_name'] = hotel['name']
