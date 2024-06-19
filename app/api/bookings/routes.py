@@ -50,6 +50,8 @@ def update_booking_status(booking_id):
     else:
         return jsonify({'error': 'Booking not found'}), 404
 
+from datetime import datetime
+
 @bookings_blueprint.route('/user', methods=['GET'])
 @jwt_required()
 def get_bookings_by_user():
@@ -58,22 +60,24 @@ def get_bookings_by_user():
 
     results = []
     for booking in bookings:
+        # Update status to "completed" if end_date has passed
+        if 'end_date' in booking:
+            end_date = datetime.strptime(booking['end_date'], "%Y-%m-%dT%H:%M:%S")
+            if end_date < datetime.utcnow():
+                booking['status'] = 'completed'
+                mongo.db.bookings.update_one(
+                    {'_id': booking['_id']},
+                    {'$set': {'status': 'completed'}}
+                )
+
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
         booking_data = serialize_document(booking)
         booking_data['hotel_name'] = hotel['name']
         booking_data['hotel_address'] = hotel['address']
-
-
-        if 'end_date' in booking and booking['end_date'] < datetime.datetime.now():
-            booking['status'] = 'completed'
-            mongo.db.bookings.update_one(
-                {'_id': booking['_id']},
-                {'$set': {'status': 'completed'}}
-            )
-
         results.append(booking_data)
     
     return jsonify(results), 200
+
 
 @bookings_blueprint.route('/businessman', methods=['GET'])
 @jwt_required()
