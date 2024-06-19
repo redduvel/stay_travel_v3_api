@@ -63,7 +63,8 @@ def get_bookings_by_user():
         booking_data['hotel_name'] = hotel['name']
         booking_data['hotel_address'] = hotel['address']
 
-        if 'end_date' in booking and booking['end_date'] < datetime.utcnow():
+
+        if 'end_date' in booking and booking['end_date'] < datetime.datetime.now():
             booking['status'] = 'completed'
             mongo.db.bookings.update_one(
                 {'_id': booking['_id']},
