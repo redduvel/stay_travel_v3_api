@@ -24,11 +24,23 @@ def create_review(hotel_id):
     mongo.db.reviews.insert_one(review)
     return jsonify({'message': 'Review added successfully'}), 201
 
+
 @reviews_blueprint.route('/<hotel_id>', methods=['GET'])
 def get_reviews(hotel_id):
     reviews = mongo.db.reviews.find({'hotel_id': ObjectId(hotel_id)})
-    result = [serialize_document(review) for review in reviews]
+    result = []
+
+    for review in reviews:
+        user = mongo.db.users.find_one({'_id': review['user_id']})
+        review_data = serialize_document(review)
+        if user:
+            review_data['user_first_name'] = user.get('first_name', 'Unknown')
+            review_data['user_avatar'] = user.get('avatar', '')
+        result.append(review_data)
+
     return jsonify(result), 200
+
+
 
 @reviews_blueprint.route('/<review_id>', methods=['DELETE'])
 @jwt_required()
