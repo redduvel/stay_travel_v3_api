@@ -60,9 +60,16 @@ def get_bookings_by_user():
     for booking in bookings:
         hotel = mongo.db.hotels.find_one({'_id': booking['hotel_id']})
         booking_data = serialize_document(booking)
-        print(booking_data)
         booking_data['hotel_name'] = hotel['name']
         booking_data['hotel_address'] = hotel['address']
+
+        if 'end_date' in booking and booking['end_date'] < datetime.utcnow():
+            booking['status'] = 'completed'
+            mongo.db.bookings.update_one(
+                {'_id': booking['_id']},
+                {'$set': {'status': 'completed'}}
+            )
+
         results.append(booking_data)
     
     return jsonify(results), 200
