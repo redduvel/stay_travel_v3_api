@@ -19,9 +19,25 @@ def create_review(hotel_id):
         'text': data['text'],
         'rating': data['rating'],
         'isDeleted': False,
-        'created_at': datetime.datetime.now() 
+        'created_at': datetime.datetime.now()
     }
     mongo.db.reviews.insert_one(review)
+
+    reviews = mongo.db.reviews.find({'hotel_id': ObjectId(hotel_id), 'isDeleted': False})
+    
+    total_reviews = 0
+    total_rating = 0
+    for review in reviews:
+        total_reviews += 1
+        total_rating += review['rating']
+    
+    average_rating = total_rating / total_reviews if total_reviews > 0 else 0
+
+    mongo.db.hotels.update_one(
+        {'_id': ObjectId(hotel_id)},
+        {'$set': {'averageRating': average_rating}}
+    )
+
     return jsonify({'message': 'Review added successfully'}), 201
 
 
